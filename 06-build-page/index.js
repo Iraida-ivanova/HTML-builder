@@ -6,8 +6,8 @@ const fs = require('fs');
   const pathToStyles = path.join(__dirname, 'styles');
   const copiedFolder = 'assets';
   const dirname = __dirname;
+  await fs.promises.rm(projectPath, {force: true, recursive: true});
   await fs.promises.mkdir(projectPath, {recursive: true});
-  await clearDirectory(projectPath);
   await copyAssets(projectPath, dirname, copiedFolder);
   await writeIndexHtml(projectPath);
   await writeStyleCss(projectPath, pathToStyles);
@@ -55,7 +55,7 @@ async function writeIndexHtml(projectPath) {
   let template = '';
   const rs = fs.createReadStream(path.join(__dirname, 'template.html'), 'utf-8');
 
-  const ws = fs.createWriteStream(path.join(projectPath, 'index.html'))
+  const ws = fs.createWriteStream(path.join(projectPath, 'index.html'));
 
   rs.on('data', chunk => template += chunk);
   rs.on('end', () => {
@@ -74,22 +74,5 @@ async function writeIndexHtml(projectPath) {
       });
     }
   });
-}
-async function clearDirectory(pathToDir) {
-  const files = await fs.promises.readdir(pathToDir, {withFileTypes: true});
-  if (files.length === 0) {
-    fs.rmdir(pathToDir, err => {
-      if(err) throw err;
-    });
-  }
-  for (const file of files) {
-    if (file.isFile()) {
-      fs.unlink(path.join(pathToDir, file.name), err => {
-        if (err) throw err;
-      });
-    } else {
-      await clearDirectory(path.join(pathToDir, file.name));
-    }
-  }
 }
 
